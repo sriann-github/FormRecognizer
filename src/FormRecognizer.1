@@ -1,0 +1,56 @@
+// src/FormRecognizer.js
+import React, { useState } from 'react';
+import axios from 'axios';
+import './FormRecognizer.css';
+
+const FormRecognizer = () => {
+  const [file, setFile] = useState(null);
+  const [response, setResponse] = useState(null);
+
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await axios.post('YOUR_AZURE_FORM_RECOGNIZER_ENDPOINT', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Ocp-Apim-Subscription-Key': 'YOUR_SUBSCRIPTION_KEY'
+        }
+      });
+      setResponse(res.data);
+    } catch (error) {
+      console.error('Error submitting the form', error);
+    }
+  };
+
+  return (
+    <div className="form-container">
+      <h2>Upload Receipt</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="file"
+          className="file-input"
+          onChange={handleFileChange}
+        />
+        <button type="submit" className="submit-button">
+          Submit
+        </button>
+      </form>
+      {response && (
+        <div className="response-container">
+          <pre>{JSON.stringify(response, null, 2)}</pre>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default FormRecognizer;
